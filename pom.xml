@@ -50,10 +50,10 @@
                     <descriptor>package-full.xml</descriptor>
                     <archive>
                         <manifest>
-                            <mainClass>com.qiming.sqltools.Main</mainClass>
+                            <mainClass>com.jim.tabledesigner.Main</mainClass>
                         </manifest>
                     </archive>
-                    <finalName>pdm</finalName>
+                    <finalName>table</finalName>
                 </configuration>
                 <executions>
                     <execution>
