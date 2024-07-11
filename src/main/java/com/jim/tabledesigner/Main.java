@@ -30,6 +30,10 @@ public class Main {
 
     private static Scanner scanner = new Scanner(System.in);
 
+    // ANSI 转义码，用于设置文本颜色
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_RED = "\u001B[31m";
+
     public static void main(String[] args) throws IOException {
 
         /**
@@ -53,70 +57,21 @@ public class Main {
         boolean continueLoop = true;
 
         while (continueLoop) {
-            System.out.println("请选择以下操作：");
-            System.out.println("1 - 根据注释设置表列名称");
-            System.out.println("2 - 根据注释设置表名称");
-            System.out.println("3 - 为所有表名添加前缀");
-            System.out.println("4 - 添加额外列");
-            System.out.println("5 - 执行1、2、3、4全部操作");
-            System.out.println("6 - 退出程序");
-            System.out.println("7 - 补充注释"); // 为没有注释的列添加注释.如果按流程是不会出现这个问题的，但是怕手工添加的字段忘记加comment.
-            System.out.println("8 - 改变连线风格");
-            System.out.println("9 - tinyint(1)字段设置为not null并默认值为0");
-            System.out.println("10 - 从SQL语句添加其它模块的表");
-            System.out.println("11 - 从SQL语句添加业务表");
-            System.out.println("12 - 删除指定Name的列");
 
             try {
+                System.out.println(ANSI_RED + "正在监听剪贴板\r\n按任意键退出程序..." + ANSI_RESET);
 
-                int choice = Integer.parseInt(scanner.nextLine());
+                // 等待用户输入任意行
+                scanner.nextLine();
 
-                switch (choice) {
-                    case 1:
-                        assignCommentToColumnName(args);
-                        break;
-                    case 2:
-                        addAdditionalColumns(args, true);
-                        break;
-                    case 3:
-                        assignCommentToTableName(args);
-                        break;
-                    case 4:
-                        addPrefixToTableNames(args);
-                        break;
-                    case 5:
-                        // 依次执行1、2、3、4对应的功能
-                        assignCommentToColumnName(args);
-                        assignCommentToTableName(args);
-                        addPrefixToTableNames(args);
-                        addAdditionalColumns(args, true);
-                        break;
-                    case 6:
-                        continueLoop = false;
-                        System.out.println("程序已退出。");
-                        break;
-                    case 7:
-                        supplementaryComment(args);
-                        break;
-                    case 8:
-                        changeCornerStyleTo3(args);
-                        break;
-                    case 9:
-                        setTinyintColumnsNotNullAndDefault0(args);
-                        break;
-                    case 10:
-                        addTable(args);
-                        break;
-                    case 11:
-                        processNewTable();
-                        break;
-                    case 12:
-                        removeColumnsByName(args);
-                        break;
-                    default:
-                        System.out.println("Invalid input. Please enter 1 ~ 12.");
-                        break;
-                }
+                // 关闭 Scanner 对象
+                scanner.close();
+
+                System.out.println("程序已退出。");
+
+                // 退出程序
+                System.exit(0);
+
             } catch (NumberFormatException e) {
                 System.err.println("Invalid input: Please enter a number.");
             } catch (Exception e) {
@@ -168,6 +123,7 @@ public class Main {
         assignCommentToTableName(argsGlobal);
         addPrefixToTableNames(argsGlobal);
         addAdditionalColumns(argsGlobal, true);
+        setTinyintColumnsNotNullAndDefault0(argsGlobal);
 
         // 打印新增的表的表名
         for (Element newTable : newTables) {
@@ -211,6 +167,7 @@ public class Main {
         }
     }
 
+    // 添加审计字段
     public static void addAdditionalColumns(String[] args, boolean addAdditionalColumns) throws DocumentException, IOException {
         if (args.length < 1) {
             throw new IllegalArgumentException("第一个参数必须是pdm文件路径");
@@ -289,6 +246,7 @@ public class Main {
     }
 
 
+    // 把列的注释赋值给列名
     public static void assignCommentToColumnName(String[] args) throws DocumentException, IOException {
         if (args.length < 1) {
             throw new IllegalArgumentException("第一个参数必须是pdm文件路径");
@@ -347,6 +305,7 @@ public class Main {
         }
     }
 
+    // 为表名添加前缀，前缀来源于命令行参数
     public static void addPrefixToTableNames(String[] args) throws DocumentException, IOException {
         if (args.length < 2) {
             throw new IllegalArgumentException("需要两个参数：pdm文件路径和表名前缀");
@@ -390,7 +349,7 @@ public class Main {
         }
     }
 
-
+    // 把表的注释赋值给表名
     public static void assignCommentToTableName(String[] args) throws DocumentException, IOException {
         if (args.length < 1) {
             throw new IllegalArgumentException("第一个参数必须是pdm文件路径");
@@ -496,29 +455,7 @@ public class Main {
         }
     }
 
-    public static void changeCornerStyleTo3(String[] args) throws DocumentException, IOException {
-        if (args.length < 1) {
-            throw new IllegalArgumentException("第一个参数必须是pdm文件路径");
-        }
-        String fileName = args[0];
-        SAXReader saxReader = new SAXReader();
-        Document document = saxReader.read(new File(fileName));
-        Element rootElement = document.getRootElement();
-
-        Namespace aNamespace = new Namespace("a", "attribute");
-
-        List<Element> cornerStyleElements = rootElement.selectNodes("//a:CornerStyle");
-
-        for (Element cornerStyleElement : cornerStyleElements) {
-            cornerStyleElement.setText("3");
-        }
-
-        // 保存修改后的PDM文件
-        XMLWriter writer = new XMLWriter(new FileOutputStream(fileName));
-        writer.write(document);
-        writer.close();
-    }
-
+    // 设置所有tinyint类型的列为非空且默认值为0
     public static void setTinyintColumnsNotNullAndDefault0(String[] args) throws DocumentException, IOException {
         if (args.length < 1) {
             throw new IllegalArgumentException("第一个参数必须是pdm文件路径");
@@ -588,46 +525,6 @@ public class Main {
         }
     }
 
-    public static void removeColumnsByName(String[] args) throws DocumentException, IOException {
-        if (args.length < 1) {
-            throw new IllegalArgumentException("第一个参数必须是pdm文件路径");
-        }
-        String fileName = args[0];
-
-        SAXReader saxReader = new SAXReader();
-        Document document = saxReader.read(new File(fileName));
-        Element rootElement = document.getRootElement();
-
-        Namespace oNamespace = new Namespace("o", "object");
-        Namespace cNamespace = new Namespace("c", "collection");
-        Namespace aNamespace = new Namespace("a", "attribute");
-
-        Element rootObject = rootElement.element(new QName("RootObject", oNamespace));
-        Element children = rootObject.element(new QName("Children", cNamespace));
-        Element model = children.element(new QName("Model", oNamespace));
-        List<Element> tableEles = model.element(new QName("Tables", cNamespace)).elements(new QName("Table", oNamespace));
-
-        boolean continueRemoving = true;
-
-        while (continueRemoving) {
-            System.out.print("请输入要删除的列名（输入 'q' 退出）：");
-            String columnNameToRemove = scanner.nextLine();
-
-            if ("q".equalsIgnoreCase(columnNameToRemove)) {
-                continueRemoving = false;
-            } else {
-                // 移除指定名称的列
-                removeColumnsByName(tableEles, oNamespace, aNamespace, cNamespace, columnNameToRemove);
-                System.out.println("已删除列：" + columnNameToRemove);
-            }
-        }
-
-        // 保存修改后的PDM文件
-        XMLWriter writer = new XMLWriter(new FileOutputStream(fileName));
-        writer.write(document);
-        writer.close();
-
-    }
 
     /**
      * 尝试解析SQL语句，并在成功时返回true。
@@ -648,7 +545,7 @@ public class Main {
     }
 
     /**
-     * 下面是增加一张表的例子，这里增加的表是MeetingRegistration，如果要加其它表就需要先修改代码
+     * 向PDM文件中增加一张表
      *
      * @param args
      * @throws DocumentException
@@ -795,47 +692,6 @@ public class Main {
             return columnSpecs.get(commentIdx + 1);
         }
         return "";
-    }
-
-    /**
-     * 大模型分析sql文件并给出的代码，如果jsalparser表现不好可以考虑使用这个方法
-     *
-     * @param document
-     * @param oNamespace
-     * @param aNamespace
-     * @param cNamespace
-     */
-    static void addTable(Document document, Namespace oNamespace, Namespace aNamespace, Namespace cNamespace) {
-        Element rootElement = document.getRootElement();
-        Element rootObject = rootElement.element(new QName("RootObject", oNamespace));
-        Element children = rootObject.element(new QName("Children", cNamespace));
-        Element model = children.element(new QName("Model", oNamespace));
-        List<Element> tableEles = model.element(new QName("Tables", cNamespace)).elements(new QName("Table", oNamespace));
-
-        // 创建新表
-        Element newTable = DocumentHelper.createElement(new QName("Table", oNamespace));
-        newTable.addElement(new QName("Name", aNamespace)).setText("会议报名表");
-        newTable.addElement(new QName("Code", aNamespace)).setText("MEETING_REGISTRATION");
-        newTable.addElement(new QName("Comment", aNamespace)).setText("会议报名表");
-
-        // 定义列
-        Element columns = newTable.addElement(new QName("Columns", cNamespace));
-        addColumn(columns, "MEETING_REGISTRATION_ID", "会议报名ID", "VARCHAR(36)", "PRIMARY KEY", "", oNamespace, aNamespace);
-        addColumn(columns, "NAME", "姓名", "VARCHAR(255)", "NOT NULL", "", oNamespace, aNamespace);
-        addColumn(columns, "CONTACT_PHONE", "联系电话", "VARCHAR(20)", "NOT NULL", "", oNamespace, aNamespace);
-        addColumn(columns, "REPRESENTING_GROUP", "所属代表团", "VARCHAR(255)", "NOT NULL", "", oNamespace, aNamespace);
-        addColumn(columns, "JOB_TITLE", "单位职务", "VARCHAR(255)", "NOT NULL", "", oNamespace, aNamespace);
-        addColumn(columns, "VEHICLE_PLATE_NUMBER", "车牌号码", "VARCHAR(20)", "NOT NULL", "", oNamespace, aNamespace);
-
-        // 将新表添加到模型中
-        tableEles.add(newTable);
-
-        // 增加换行以提高可读性
-        newTable.addText("\n");
-
-        // 返回新添加的表
-        newTables.add(newTable);
-
     }
 
     /**
