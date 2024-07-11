@@ -1,6 +1,10 @@
 # TableDesigner
 
-### 
+### 工具简介
+
+TableDesigner是一个配合PowerDesigner 16使用的表设计工具，它监控原型图表单的截图，调用大模型接口对表单截图进行分析并生成sql，  然后通过sql分析工具完成字段分析，最后把分析结果插入到PowerDesigner的PDM文件中，也就是说只需要通过截图操作就完成粗略的表设计。
+
+通过这种自动化工具可以减少使用PowerDesigner进行表设计时的繁琐的字段添加和编辑工作，从而可以有更多的精力可以投放在业务理解中，达到减少设计错误的目的。
 
 ### 使用步骤
 
@@ -16,13 +20,9 @@
 
 如果没发现表设计有什么问题，就可以重复截图操作，以便把其它表单对应的表设计追加到Table_Design.pdm中。但是在对另外一张表单进行截图前请先关掉Table_Design.pdm，因为PowerDesigner不允许其它进程修改当前打开的pdm文件。
 
-
-
 #### 使用示例：
 
 ![ ](https://raw.githubusercontent.com/zhonghuajin/TableDesigner/master/%E8%A1%A8%E8%AE%BE%E8%AE%A1%E5%B7%A5%E5%85%B7%E7%A4%BA%E4%BE%8B.gif)
-
-
 
 ### 配置说明
 
@@ -71,3 +71,22 @@ role = 你是一个精通政企系统开发的专家。
 api_base = https://api.xiaoai.plus/v1
 model_name = gpt-4o
 ```
+
+
+
+### 补充说明
+
+```
+        String[][] columnInfo = {
+                {"行政区", "ORG_ID", "varchar(50)", null},
+                {"创建时间", "CREATE_TIME", "datetime", "CURRENT_TIMESTAMP"},
+                {"更新时间", "UPDATE_TIME", "datetime", "CURRENT_TIMESTAMP"},
+                {"创建人ID", "CREATE_USER_ID", "varchar(50)", null},
+                {"更新人ID", "UPDATE_USER_ID", "varchar(50)", null},
+                {"是否已经删除", "IS_DELETED", "tinyint(1)", "0"}
+        };
+
+
+```
+
+上面是com.jim.tabledesigner.Main#addColumns函数中的代码，对应是审计相关的字段。如果希望定制这部分的内容，需要自行修改这部分的代码。
