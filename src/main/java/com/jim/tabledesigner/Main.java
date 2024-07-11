@@ -161,7 +161,7 @@ public class Main {
                 Element newColumn = DocumentHelper.createElement(new QName("Column", oNamespace));
                 newColumn.addElement(new QName("Name", aNamespace)).setText("行政级别");
                 newColumn.addElement(new QName("Code", aNamespace)).setText("ORG_ID");
-                newColumn.addElement(new QName("DataType", aNamespace)).setText("varchar(36)");
+                newColumn.addElement(new QName("DataType", aNamespace)).setText("varchar(50)");
                 columns.add(createTimeIndex, newColumn);
             }
         }
@@ -210,11 +210,11 @@ public class Main {
     static void addColumns(List<Element> columns, Namespace oNamespace, Namespace aNamespace) {
         // 定义列的基本信息
         String[][] columnInfo = {
-                {"行政区", "ORG_ID", "varchar(36)", null},
+                {"行政区", "ORG_ID", "varchar(50)", null},
                 {"创建时间", "CREATE_TIME", "datetime", "CURRENT_TIMESTAMP"},
                 {"更新时间", "UPDATE_TIME", "datetime", "CURRENT_TIMESTAMP"},
-                {"创建人ID", "CREATE_USER_ID", "varchar(36)", null},
-                {"更新人ID", "UPDATE_USER_ID", "varchar(36)", null},
+                {"创建人ID", "CREATE_USER_ID", "varchar(50)", null},
+                {"更新人ID", "UPDATE_USER_ID", "varchar(50)", null},
                 {"是否已经删除", "IS_DELETED", "tinyint(1)", "0"}
         };
 
