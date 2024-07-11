@@ -6,7 +6,7 @@
 
 1. 启动工具（启动前先进行配置，见配置说明部分）
    
-   **java  -Dfile.encoding=UTF-8   -jar table-designer.jar xxx_**
+   java  -Dfile.encoding=UTF-8   -jar table-designer.jar xxx_
    
    "xxx_"是功能模块涉及的表的表名前缀，比如正在设计会议模块，则使用"meeting_"作为参数。
 
@@ -15,6 +15,12 @@
 如果是第一次截图，稍等片刻之后，当前目录下就会生成名为Table_Design.pdm的文件并自动打开，文件打开后如果发现表设计并不完全符合业务需求则可以进行修改。
 
 如果没发现表设计有什么问题，就可以重复截图操作，以便把其它表单对应的表设计追加到Table_Design.pdm中。但是在对另外一张表单进行截图前请先关掉Table_Design.pdm，因为PowerDesigner不允许其它进程修改当前打开的pdm文件。
+
+
+
+#### 使用示例：
+
+![ ](https://raw.githubusercontent.com/zhonghuajin/TableDesigner/master/%E8%A1%A8%E8%AE%BE%E8%AE%A1%E5%B7%A5%E5%85%B7%E7%A4%BA%E4%BE%8B.gif)
 
 
 
