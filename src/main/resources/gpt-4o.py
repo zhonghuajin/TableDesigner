@@ -1,19 +1,35 @@
 from openai import OpenAI
 import os
-# 设置环境变量
-os.environ['http_proxy'] = 'http://127.0.0.1:4780'
-os.environ['https_proxy'] = 'http://127.0.0.1:4780'
-MODEL="gpt-4o"
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "sk-proj-tB1m0e40DrgKkYHKSZwvT3BlbkFJQpef4KmEJrjIkeCmFdvx"))
+import configparser
+import configparser
+# 创建一个ConfigParser对象
+config = configparser.ConfigParser()
+# 读取配置文件
+config.read('langchain_config.ini', encoding='utf-8')
+# 从配置文件中获取各个配置项
+
+api_key = config.get('settings', 'api_key')
+prompt_text = config.get('settings', 'prompt_text')
+role = config.get('settings', 'role')
+api_base = config.get('settings', 'api_base')
+model_name = config.get('settings', 'model_name')
+
+# 创建一个ConfigParser对象
+config = configparser.ConfigParser()
+# 读取配置文件
+config.read('langchain_config.ini', encoding='utf-8')
+
+MODEL=model_name
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", api_key))
 
 with open("image.txt", "r", encoding='utf-8') as f:
     image_data = f.read()
 response = client.chat.completions.create(
     model=MODEL,
     messages=[
-        {"role": "system", "content": "你是一个精通电子商务系统产品设计和开发的专家"},
+        {"role": "system", "content": role},
         {"role": "user", "content": [
-            {"type": "text", "text": "根据描述进行mysql表设计。使用下划线命名法，主键id使用varchar(50)类型，主键id名称包含表名并以_id结束；comment使用中文，表和字段都有comment；字段和表用使用英文命名；字段不要使用enum、text类型，适合BOOLEAN类型的用tinyint(1)类型；create table使用if not exists语句；不要create_at、update_at等审计字段；不要外键约束。给出sql语句即可，不需要任何解释。"},
+            {"type": "text", "text": prompt_text},
             {"type": "image_url", "image_url": {
                 "url": f"data:image/png;base64,{image_data}"}
             }
@@ -22,4 +38,13 @@ response = client.chat.completions.create(
     temperature=0.0,
 )
 
-print(response.choices[0].message.content)
+# Extract content from the response
+response_lines = response.choices[0].message.content.split('\n')
+
+# Remove the first and last lines
+content_to_save = '\n'.join(response_lines[1:-1])
+
+print(content_to_save)
+
+with open('gpt-gen-sql.txt', 'w', encoding='utf-8') as file:
+    file.write(content_to_save)

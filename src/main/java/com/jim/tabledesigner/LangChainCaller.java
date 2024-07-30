@@ -29,10 +29,10 @@ public class LangChainCaller {
         final String ANSI_RED = "\u001B[31m";
         // ANSI重置标记
         final String ANSI_RESET = "\u001B[0m";
-        System.out.println(ANSI_RED + " 注意：需要关闭代理服务器，否则无法进行分析 " + ANSI_RESET);
+        System.out.println(ANSI_RED + " 注意：需要先配置命令行的代理服务器，否则无法进行分析 " + ANSI_RESET);
         StringBuilder output = new StringBuilder();
         try {
-            File pythonScript = extractResource("langchain-gpt-4o.py");
+            File pythonScript = extractResource("gpt-4o.py");
             String[] command = new String[2];
             command[0] = "python";
             command[1] = pythonScript.getAbsolutePath();
