@@ -14,11 +14,6 @@ role = config.get('settings', 'role')
 api_base = config.get('settings', 'api_base')
 model_name = config.get('settings', 'model_name')
 
-# 创建一个ConfigParser对象
-config = configparser.ConfigParser()
-# 读取配置文件
-config.read('langchain_config.ini', encoding='utf-8')
-
 MODEL=model_name
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", api_key))
 
