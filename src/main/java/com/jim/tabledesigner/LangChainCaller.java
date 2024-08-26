@@ -1,6 +1,7 @@
 package com.jim.tabledesigner;
 
 import java.io.*;
+import java.util.Map;
 
 public class LangChainCaller {
     public static File extractResource(String resourceName) throws Exception {
@@ -38,6 +39,12 @@ public class LangChainCaller {
             command[1] = pythonScript.getAbsolutePath();
 
             ProcessBuilder builder = new ProcessBuilder(command);
+
+            // 设置环境变量以使用代理
+            Map<String, String> env = builder.environment();
+            env.put("HTTP_PROXY", "http://127.0.0.1:7890");
+            env.put("HTTPS_PROXY", "http://127.0.0.1:7890");
+
             Process process = builder.start();
 
             // 启动一个线程来显示正在分析图片

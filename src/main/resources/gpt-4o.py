@@ -1,7 +1,10 @@
 from openai import OpenAI
 import os
 import configparser
-import configparser
+
+# os.environ['http_proxy'] = 'http://127.0.0.1:7890'
+# os.environ['https_proxy'] = 'http://127.0.0.1:7890'
+
 # 创建一个ConfigParser对象
 config = configparser.ConfigParser()
 # 读取配置文件
@@ -11,7 +14,6 @@ config.read('langchain_config.ini', encoding='utf-8')
 api_key = config.get('settings', 'api_key')
 prompt_text = config.get('settings', 'prompt_text')
 role = config.get('settings', 'role')
-api_base = config.get('settings', 'api_base')
 model_name = config.get('settings', 'model_name')
 
 MODEL=model_name
