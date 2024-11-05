@@ -20,6 +20,8 @@ public class ClipboardWatcher implements ClipboardOwner {
 
     private Clipboard systemClipboard;
     private ExecutorService executor;
+    private String lastProcessedText = "";
+    private String lastProcessedImageBase64 = "";
 
     public ClipboardWatcher() {
         systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -30,13 +32,6 @@ public class ClipboardWatcher implements ClipboardOwner {
         executor.submit(() -> {
             Transferable contents = systemClipboard.getContents(this);
             gainOwnership(contents);
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    Thread.sleep(200); // Sleep for a small delay to check for clipboard changes
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt(); // Good practice to re-interrupt the thread
-                }
-            }
         });
     }
 
@@ -44,7 +39,7 @@ public class ClipboardWatcher implements ClipboardOwner {
         systemClipboard.setContents(t, this);
     }
 
-
+    @Override
     public void lostOwnership(Clipboard clipboard, Transferable contents) {
         Timer timer = new Timer("ClipboardWatcherTimer");
         timer.schedule(new TimerTask() {
@@ -53,6 +48,7 @@ public class ClipboardWatcher implements ClipboardOwner {
                 try {
                     Transferable newContents = clipboard.getContents(this);
                     processContents(newContents);
+                    // 只有在内容发生变化时才重新获得所有权
                     gainOwnership(newContents);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -66,7 +62,8 @@ public class ClipboardWatcher implements ClipboardOwner {
             // 检查是否为字符串数据
             if (newContents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
                 String data = (String) newContents.getTransferData(DataFlavor.stringFlavor);
-                if (data != null) {
+                if (data != null && !data.equals(lastProcessedText)) {
+                    lastProcessedText = data;
                     updateFile(data);
                 }
             }
@@ -74,7 +71,11 @@ public class ClipboardWatcher implements ClipboardOwner {
             else if (newContents.isDataFlavorSupported(DataFlavor.imageFlavor)) {
                 BufferedImage image = (BufferedImage) newContents.getTransferData(DataFlavor.imageFlavor);
                 if (image != null) {
-                    processImage(image);
+                    String base64 = encodeToString(image, "png");
+                    if (!base64.equals(lastProcessedImageBase64)) {
+                        lastProcessedImageBase64 = base64;
+                        processImage(image);
+                    }
                 }
             }
         } catch (UnsupportedFlavorException | IOException e) {
@@ -98,8 +99,8 @@ public class ClipboardWatcher implements ClipboardOwner {
 
     private void processImage(BufferedImage image) throws IOException {
         // 对图像数据进行base64编码并打印
-        String base64 = encodeToString(image, "png"); ;
-//        ApiCaller.postRequest(base64);
+        String base64 = encodeToString(image, "png");
+        // ApiCaller.postRequest(base64);
         // base64保存在当前工作目录下的image.txt文件中
         try (PrintWriter writer = new PrintWriter("image.txt")) {
             writer.println(base64);
@@ -117,7 +118,6 @@ public class ClipboardWatcher implements ClipboardOwner {
         }
     }
 
-
     private void updateFile(String data) {
         try {
             // 如果是SQL语句，尝试解析并更新addTable.sql文件
@@ -125,7 +125,7 @@ public class ClipboardWatcher implements ClipboardOwner {
                 Files.write(Paths.get("addTable.sql"), data.getBytes());
                 Main.processNewTable();
             }
-//            System.out.println("addTable.sql文件已更新。");
+            // System.out.println("addTable.sql文件已更新。");
         } catch (IOException e) {
             System.err.println("写入addTable.sql失败: " + e.getMessage());
         } catch (DocumentException e) {
@@ -134,5 +134,4 @@ public class ClipboardWatcher implements ClipboardOwner {
             e.printStackTrace();
         }
     }
-
 }
